@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  main:
+    container_name: main
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+      - 9229:9229
+    command: npm run start:dev
+    env_file:
+      - .env
+    networks:
+      - webnet
+    depends_on:
+      - redis
+      - postgres
+  redis:
+    container_name: redis
+    image: redis:6
+    networks:
+      - webnet
+  postgres:
+    image: postgres:11
+    networks:
+      - webnet
+    environment:
+      POSTGRES_DB: "testdb"
+      POSTGRES_USER: "dummy"
+      POSTGRES_PASSWORD: "dummy"
+    ports:
+      - 5433:5432
+    volumes:
+      - pgdata11:/var/lib/postgresql11/data
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "test@test.com"
+      PGADMIN_DEFAULT_PASSWORD: "abc"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - webnet
+networks:
+  webnet:
+volumes:
+  pgdata11:
